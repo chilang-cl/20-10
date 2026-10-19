@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chúc mừng 20/10</title>
+<style>
+:root{--bg:#fff5f8;--card:#ffffff;--ink:#4a2433;--sub:#8a5a6b;--pink:#e8588a;--pink2:#f9c6d8;--line:#f3d3df;--shadow:rgba(232,88,138,.18);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#241119;--card:#33192a;--ink:#fde8f0;--sub:#d9a6bb;--pink:#ff7aa8;--pink2:#5a2b43;--line:#4d2840;--shadow:rgba(0,0,0,.4)}}
+:root[data-theme="dark"]{--bg:#241119;--card:#33192a;--ink:#fde8f0;--sub:#d9a6bb;--pink:#ff7aa8;--pink2:#5a2b43;--line:#4d2840;--shadow:rgba(0,0,0,.4)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Quicksand","Segoe UI",Roboto,Arial,sans-serif;min-height:100vh}
+main{max-width:860px;margin:0 auto;padding:28px 16px 48px;text-align:center}
+h1{font-size:clamp(26px,6vw,40px);margin:8px 0 6px;color:var(--pink)}
+p.sub{color:var(--sub);margin:0 0 24px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.name{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:18px 8px;font:inherit;font-weight:700;color:var(--ink);cursor:pointer;box-shadow:0 4px 12px var(--shadow);transition:transform .15s}
+.name:hover{transform:translateY(-3px)}
+.name .tick{display:block;font-size:12px;color:var(--pink);font-weight:600;margin-top:4px;min-height:16px}
+.name.done{border-color:var(--pink)}
+.back{background:none;border:none;color:var(--pink);font:inherit;font-weight:700;cursor:pointer;margin-bottom:10px}
+.env{position:relative;aspect-ratio:3/2;border:none;border-radius:10px;background:var(--pink2);cursor:pointer;font:inherit;font-weight:800;font-size:20px;color:var(--pink);box-shadow:0 4px 10px var(--shadow);overflow:hidden;transition:transform .15s}
+.env::before{content:"";position:absolute;inset:0;background:linear-gradient(to bottom right,transparent 49%,var(--line) 50%) top left/50% 60% no-repeat,linear-gradient(to bottom left,transparent 49%,var(--line) 50%) top right/50% 60% no-repeat}
+.env span{position:relative;display:block;margin-top:34%}
+.env:hover:not(:disabled){transform:translateY(-3px) rotate(-1.5deg)}
+.env:disabled{opacity:.35;cursor:not-allowed}
+.modal{position:fixed;inset:0;background:rgba(40,10,25,.55);display:none;align-items:center;justify-content:center;padding:20px;z-index:20}
+.modal.on{display:flex}
+.paper{background:var(--card);border-radius:20px;max-width:440px;width:100%;padding:28px 24px;box-shadow:0 12px 40px rgba(0,0,0,.35);animation:pop .35s ease}
+@keyframes pop{from{transform:scale(.7) translateY(30px);opacity:0}to{transform:none;opacity:1}}
+.paper .big{font-size:40px}
+.paper h2{margin:6px 0 10px;color:var(--pink);font-size:22px}
+.paper p{font-size:18px;line-height:1.6;margin:0 0 18px}
+.btn{background:var(--pink);color:#fff;border:none;border-radius:999px;padding:10px 24px;font:inherit;font-weight:700;cursor:pointer}
+.reset{margin-top:36px;background:none;border:none;color:var(--sub);font:inherit;font-size:12px;cursor:pointer;text-decoration:underline}
+.hide{display:none}
+.edit-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:14px 0;text-align:left}
+.edit-grid label{font-size:12px;color:var(--sub)}
+.edit-grid input{width:100%;padding:8px 10px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}
+.paper.wide{max-width:520px;max-height:90vh;overflow:auto}
+.btn.ghost{background:var(--pink2);color:var(--pink)}
+</style>
+</head>
+<body>
+<main>
+  <div id="home">
+    <div style="font-size:44px">🌸</div>
+    <h1>Chúc mừng ngày 20/10</h1>
+    <p class="sub">Chọn tên của bạn để nhận phong thư lời chúc nhé!</p>
+    <div class="grid" id="names"></div>
+  </div>
+  <div id="pick" class="hide">
+    <button class="back" id="back">← Quay lại</button>
+    <h1 id="hello"></h1>
+    <p class="sub">Hãy chọn một phong thư bạn thích 💌</p>
+    <div class="grid" id="envs"></div>
+  </div>
+  <button class="reset" id="editBtn">✏️ Chỉnh sửa tên</button><br>
+  <button class="reset" id="reset" style="margin-top:8px">Làm mới lựa chọn</button>
+</main>
+
+<div class="modal" id="modal">
+  <div class="paper" role="dialog" aria-live="polite">
+    <div class="big">💐</div>
+    <h2 id="mt"></h2>
+    <p id="mw"></p>
+    <button class="btn" id="close">Cảm ơn nhé!</button>
+  </div>
+</div>
+
+<div class="modal" id="editModal">
+  <div class="paper wide">
+    <h2>✏️ Chỉnh sửa tên (20 ô)</h2>
+    <p style="font-size:14px;margin:0">Nhập tên các bạn nữ, ô nào để trống sẽ không hiện.</p>
+    <div class="edit-grid" id="editGrid"></div>
+    <button class="btn" id="saveNames">Lưu</button>
+    <button class="btn ghost" id="cancelNames">Hủy</button>
+  </div>
+</div>
+
+<script>
+// ====== Danh sách 20 tên mặc định (có thể sửa bằng nút "Chỉnh sửa tên" ở cuối trang) ======
+const DEFAULT_NAMES = ["HOÀNG ANH","NGỌC DUYÊN","TUYẾT GIANG","NGUYỄN HÀ","VI HẰNG","DIỆU HIỀN","ĐÀM HƯƠNG","LỘC HƯƠNG","MAI LY","BẢO NGỌC","KHÁNH NGỌC","PHƯƠNG NHUNG","HOÀNG NHUNG","THANH THẢO","ÔN THÊN","ANH THƯ","NGỌC TIẾP","THUỲ TRANG","MA XANH"];
+let NAMES = DEFAULT_NAMES.slice();
+try {
+  const s = JSON.parse(localStorage.getItem("chuc2010_names_v2") || "null");
+  if (Array.isArray(s) && s.length) NAMES = s;
+} catch (e) {}
+
+// ====== 21 lời chúc (20 + 1 dự phòng). {n} sẽ thay bằng tên ======
+const WISHES = [
+ "Chúc {n} luôn giữ vững ngọn lửa học tập, mỗi ngày đến lớp đều là một ngày vui và đầy năng lượng!",
+ "Chúc {n} học thật giỏi, điểm cao rực rỡ như những bông hoa ngày 20/10!",
+ "Chúc {n} thông minh, tự tin và luôn nhận được những điểm 9, điểm 10 trong mọi kỳ thi.",
+ "Chúc {n} gặp nhiều may mắn trong thi cử, bài nào cũng làm trọn vẹn, câu nào cũng đúng!",
+ "Chúc {n} luôn xinh đẹp, rạng rỡ và tỏa sáng cả trong học tập lẫn cuộc sống.",
+ "Chúc {n} chăm chỉ mà không áp lực, học mà vẫn vui, vui mà vẫn giỏi!",
+ "Chúc {n} mọi ước mơ trên con đường học vấn đều trở thành hiện thực.",
+ "Chúc {n} luôn khỏe mạnh để học thật tốt, ăn ngon, ngủ đủ và tràn đầy sức sống!",
+ "Chúc {n} gặp được nhiều thầy cô tốt, bạn bè thân và những bài giảng thật dễ hiểu.",
+ "Chúc {n} tiếp tục là cô gái mạnh mẽ, dám thử, dám sai và dám chinh phục mọi thử thách.",
+ "Chúc {n} đạt kết quả thật tốt trong học kỳ này và cả những kỳ sau nữa!",
+ "Chúc {n} luôn nở nụ cười thật tươi, vì nụ cười của bạn làm cả lớp thêm vui.",
+ "Chúc {n} mỗi trang vở là một bước tiến, mỗi ngày học là một niềm vui.",
+ "Chúc {n} không bao giờ thiếu động lực và luôn có thêm thật nhiều cảm hứng học tập mới.",
+ "Chúc {n} có tuổi học trò thật đẹp, đầy kỷ niệm ngọt ngào bên thầy cô và bạn bè.",
+ "Chúc {n} môn nào cũng hiểu, bài nào cũng làm được, bài kiểm tra nào cũng thuận lợi!",
+ "Chúc {n} luôn tin vào bản thân: bạn giỏi hơn bạn nghĩ rất nhiều!",
+ "Chúc {n} có một ngày 20/10 thật ấm áp, nhận được thật nhiều hoa, quà và lời yêu thương.",
+ "Chúc {n} học tập tiến bộ từng ngày, vững vàng bước tới tương lai rực rỡ phía trước.",
+ "Chúc {n} bình yên, hạnh phúc và luôn được yêu thương như những gì bạn đã trao đi.",
+ "Chúc {n} học tốt, thi tốt và mãi là cô gái đáng yêu của cả lớp! 🌷"
+];
+
+const KEY = "chuc2010_v1";
+let state = {};
+try { state = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { state = {}; }
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+
+const $ = id => document.getElementById(id);
+let current = null;
+
+function renderNames(){
+  $("names").innerHTML = "";
+  NAMES.forEach(n => {
+    const b = document.createElement("button");
+    b.className = "name" + (n in state ? " done" : "");
+    b.innerHTML = n + '<span class="tick">' + (n in state ? "✓ đã mở thư" : "") + "</span>";
+    b.onclick = () => choose(n);
+    $("names").appendChild(b);
+  });
+}
+
+function showWish(n, i){
+  $("mt").textContent = "Gửi " + n + " 💌";
+  $("mw").textContent = WISHES[i].replace("{n}", n);
+  $("modal").classList.add("on");
+}
+
+function choose(n){
+  if (n in state){ showWish(n, state[n]); return; }
+  current = n;
+  $("hello").textContent = "Xin chào " + n + "!";
+  const taken = Object.values(state);
+  $("envs").innerHTML = "";
+  WISHES.forEach((_, i) => {
+    const b = document.createElement("button");
+    b.className = "env";
+    b.innerHTML = "<span>" + (i + 1) + "</span>";
+    b.disabled = taken.includes(i);
+    b.onclick = () => { state[current] = i; save(); showWish(current, i); renderNames(); goHome(); };
+    $("envs").appendChild(b);
+  });
+  $("home").classList.add("hide");
+  $("pick").classList.remove("hide");
+  window.scrollTo(0, 0);
+}
+
+function goHome(){
+  $("pick").classList.add("hide");
+  $("home").classList.remove("hide");
+}
+
+$("back").onclick = goHome;
+$("close").onclick = () => $("modal").classList.remove("on");
+$("modal").onclick = e => { if (e.target.id === "modal") $("modal").classList.remove("on"); };
+$("reset").onclick = () => {
+  if (confirm("Xóa hết lựa chọn đã lưu trên thiết bị này?")){ state = {}; save(); renderNames(); }
+};
+renderNames();
+
+// ===== Chỉnh sửa tên =====
+$("editBtn").onclick = () => {
+  $("editGrid").innerHTML = "";
+  for (let i = 0; i < 20; i++){
+    const w = document.createElement("div");
+    w.innerHTML = '<label>Ô ' + (i + 1) + '</label><input maxlength="20">';
+    w.querySelector("input").value = NAMES[i] || "";
+    $("editGrid").appendChild(w);
+  }
+  $("editModal").classList.add("on");
+};
+$("cancelNames").onclick = () => $("editModal").classList.remove("on");
+$("saveNames").onclick = () => {
+  const list = [...document.querySelectorAll("#editGrid input")].map(i => i.value.trim()).filter(Boolean);
+  if (!list.length) return;
+  NAMES = list;
+  try { localStorage.setItem("chuc2010_names_v2", JSON.stringify(NAMES)); } catch (e) {}
+  renderNames();
+  goHome();
+  $("editModal").classList.remove("on");
+};
+</script>
+</body>
+</html>
